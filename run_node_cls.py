@@ -16,7 +16,7 @@ from utils import apply_mask, generate_mask, ABMInMemoryDataset, set_seed, logge
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_path', default='data/abm_sep_obs')
+parser.add_argument('--data_path', default='data/abm/all_users')
 parser.add_argument('--type',
                     default='uniform',
                     choices=['uniform', 'bias', 'struct'],

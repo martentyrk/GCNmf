@@ -42,9 +42,7 @@ def generate_uniform_mask(features, missing_rate):
         mask[i][j] is True if features[i][j] is missing.
 
     """
-    mask = torch.rand(size=features.size())
-    mask = mask <= missing_rate
-    return mask
+    return torch.rand(size=features.size()) <= missing_rate
 
 
 def generate_bias_mask(features, ratio, high=0.9, low=0.1):
@@ -99,4 +97,4 @@ def apply_mask(features, mask):
     mask : torch.tensor
 
     """
-    features[mask] = float('nan')
+    features[mask] = float(-1)

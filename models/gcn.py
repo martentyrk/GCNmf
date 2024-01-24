@@ -27,24 +27,24 @@ class GCN(nn.Module):
             gcn_layers.append((GCNConv(nhid, nhid), 'x, edge_index -> x'))
             gcn_layers.append((nn.ReLU(inplace=True), 'x -> x'))
         
-        gcn_layers.append((GCNConv(nhid, nhid), 'x, edge_index -> x'))
+        # gcn_layers.append((GCNConv(nhid, nhid), 'x, edge_index -> x'))
         self.gcn = Sequential('x, edge_index', gcn_layers)
         
         # Leaf network for observations
-        obs_layers = [
-            nn.Linear(2, nhid),
-            nn.Dropout(dropout),
-            nn.ReLU(),
-        ]
+        # obs_layers = [
+        #     nn.Linear(2, nhid),
+        #     nn.Dropout(dropout),
+        #     nn.ReLU(),
+        # ]
     
-        for _ in range(n_layers - 1):
-            obs_layers.append(nn.Linear(nhid, nhid))
-            obs_layers.append(nn.Dropout(0.1))
-            obs_layers.append(nn.ReLU())
+        # for _ in range(n_layers - 1):
+        #     obs_layers.append(nn.Linear(nhid, nhid))
+        #     obs_layers.append(nn.Dropout(0.1))
+        #     obs_layers.append(nn.ReLU())
             
-        obs_layers.append(nn.Linear(nhid, nhid))
+        # obs_layers.append(nn.Linear(nhid, nhid))
         
-        self.leaf_network_obs = nn.Sequential(*obs_layers)
+        # self.leaf_network_obs = nn.Sequential(*obs_layers)
         
         backbone_layers = [
             nn.Linear(nhid, nhid),
@@ -53,8 +53,6 @@ class GCN(nn.Module):
             nn.Linear(nhid, 1),
         ]
         self.backbone_fc = nn.Sequential(*backbone_layers)
-        
-    
 
     def reset_parameters(self):
         for layer in self.gcn:
@@ -77,48 +75,48 @@ class GCN(nn.Module):
 
         return F.sigmoid(logits)
     
-    def forward(self, data):
-        x, edge_index, batch, obs = data.x, data.edge_index, data.batch, torch.tensor(np.array(data.obs), dtype=torch.float32)
-        obs = obs.cpu().to(device)
+    # def forward(self, data):
+    #     x, edge_index, batch, obs = data.x, data.edge_index, data.batch, torch.tensor(np.array(data.obs), dtype=torch.float32)
+    #     obs = obs.cpu().to(device)
         
-        #Create mask object for obs, since some values have been padded
-        mask = obs[:, :, 0] >= 0 
-        row_sum = torch.sum(mask, dim=1, keepdim=True) + 1E-9
-        mask = (mask / row_sum).unsqueeze(-1).detach()
+    #     #Create mask object for obs, since some values have been padded
+    #     mask = obs[:, :, 0] >= 0 
+    #     row_sum = torch.sum(mask, dim=1, keepdim=True) + 1E-9
+    #     mask = (mask / row_sum).unsqueeze(-1).detach()
         
         
-        x = self.gcn(x, edge_index)
+    #     x = self.gcn(x, edge_index)
         
-        x = global_add_pool(x, batch)
+    #     x = global_add_pool(x, batch)
         
-        obs = self.leaf_network_obs(obs)
-        obs_pooled = torch.sum(obs * mask, dim=1)
+    #     obs = self.leaf_network_obs(obs)
+    #     obs_pooled = torch.sum(obs * mask, dim=1)
         
-        node_features_w_obs = x + obs_pooled
+    #     node_features_w_obs = x + obs_pooled
         
-        logits = self.backbone_fc(node_features_w_obs)
+    #     logits = self.backbone_fc(node_features_w_obs)
 
-        return F.sigmoid(logits)
+    #     return F.sigmoid(logits)
 
 
-class GCNConvo(nn.Module):
-    def __init__(self, in_features, out_features, dropout):
-        super(GCNConvo, self).__init__()
-        self.in_features = in_features
-        self.out_features = out_features
+# class GCNConvo(nn.Module):
+#     def __init__(self, in_features, out_features, dropout):
+#         super(GCNConvo, self).__init__()
+#         self.in_features = in_features
+#         self.out_features = out_features
 
-        self.dropout = dropout
-        self.fc = nn.Linear(in_features, out_features)
+#         self.dropout = dropout
+#         self.fc = nn.Linear(in_features, out_features)
         
-        self.reset_parameters()
+#         self.reset_parameters()
         
 
-    def reset_parameters(self):
-        nn.init.xavier_uniform_(self.fc.weight, gain=1.414)
-        self.fc.bias.data.fill_(0)
+#     def reset_parameters(self):
+#         nn.init.xavier_uniform_(self.fc.weight, gain=1.414)
+#         self.fc.bias.data.fill_(0)
     
-    def forward(self, x, adj):
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.fc(x)
-        x = torch.spmm(adj, x)
-        return x
+#     def forward(self, x, adj):
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+#         x = self.fc(x)
+#         x = torch.spmm(adj, x)
+#         return x

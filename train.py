@@ -243,7 +243,7 @@ class NodeClsTrainer:
                     })
         
         fname_model = self.runner.name
-        torch.save(self.model.state_dict(), "results/models/" + fname_model)
+        torch.save(self.model.state_dict(), "results/models/" + fname_model + '.pth')
         logger.info(f"Saved PyTorch Model State to {fname_model}")
         
         return {
